@@ -4,7 +4,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
+const getPhotos = require('./modules/photos');
 
 // USE
 const app = express();
@@ -18,38 +18,11 @@ app.get('/', (req, res) => {
   res.send('all systems go');
 });
 
-app.get('/photos', async (req, res, next) => {
-  try {
-  // find out what the front is requesting
-  let search = req.query.searchQuery;
-  // make request to the Unsplash API
-  let url = `https://api.unsplash.com/search/photos/?client_id=${process.env.UNSPLASH_API_KEY}&query=${search}`;
-  
-  let results = await axios.get(url);
-  
-  // Groom the data we get back from Unplash
-  let groomedPhotos = results.data.results.map(pic => new Photo(pic));
-
-  // send it to the front end
-  res.send(groomedPhotos);
-  } catch (error) {
-    next(error);
-  }
-});
+app.get('/photos', getPhotos);
 
 app.get('*', (req, res) => {
   res.status(404).send('Not found')
 })
-
-
-// CLASSES
-class Photo {
-  constructor(pic) {
-    this.src = pic.urls.regular;
-    this.alt = pic.alt_description;
-    this.artist = pic.user.name;
-  }
-}
 
 
 // ERRORS
